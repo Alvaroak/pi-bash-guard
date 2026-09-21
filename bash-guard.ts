@@ -15,8 +15,8 @@
  * to the frugal flag.
  */
 
-import { DynamicBorder, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { Container, Key, matchesKey, Spacer, Text, wrapTextWithAnsi } from "@earendil-works/pi-tui";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { Container, Key, matchesKey, Spacer, Text, truncateToWidth, visibleWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
 
 interface BashGuardState {
 	enabled: boolean;
@@ -37,7 +37,6 @@ function createBashGuardConfirmComponent(command: string, label: string) {
 		const container = new Container();
 		const redBorder = (s: string) => theme.fg("error", s);
 
-		container.addChild(new DynamicBorder(redBorder));
 		container.addChild(new Text(theme.fg("error", theme.bold("Dangerous Command Detected")), 1, 0));
 		container.addChild(new Spacer(1));
 		container.addChild(new Text(theme.fg("warning", `This command contains ${label}:`), 1, 0));
@@ -48,13 +47,22 @@ function createBashGuardConfirmComponent(command: string, label: string) {
 		container.addChild(new Text(theme.fg("text", "Allow execution?"), 1, 0));
 		container.addChild(new Spacer(1));
 		container.addChild(new Text(theme.fg("dim", "y/enter: allow • n/esc: deny"), 1, 0));
-		container.addChild(new DynamicBorder(redBorder));
 
 		return {
 			render: (width: number) => {
-				const contentWidth = Math.max(1, width - 4);
-				commandText.setText(wrapTextWithAnsi(theme.fg("text", command), contentWidth).join("\n"));
-				return container.render(width);
+				// ctx.ui.custom's overlay positions this component, but does not add a
+				// frame. Render one here so the modal has visible side borders and
+				// consistent horizontal/vertical breathing room.
+				const innerWidth = Math.max(1, width - 4);
+				commandText.setText(wrapTextWithAnsi(theme.fg("text", command), Math.max(1, innerWidth - 2)).join("\n"));
+				const wrap = (line: string) => {
+					const content = truncateToWidth(line, innerWidth, "");
+					const pad = " ".repeat(Math.max(0, innerWidth - visibleWidth(content)));
+					return `${redBorder("│")} ${content}${pad} ${redBorder("│")}`;
+				};
+				const top = redBorder(`┌${"─".repeat(Math.max(1, width - 2))}┐`);
+				const bottom = redBorder(`└${"─".repeat(Math.max(1, width - 2))}┘`);
+				return [top, wrap(""), ...container.render(innerWidth).map(wrap), wrap(""), bottom];
 			},
 			invalidate: () => container.invalidate(),
 			handleInput: (data: string) => {
