@@ -123,7 +123,15 @@ export default function bashGuardExtension(pi: ExtensionAPI): void {
 			return { block: true, reason: `Bash guard: blocked "${match}" (no UI for confirmation)` };
 		}
 
-		const choice = await ctx.ui.custom(createBashGuardConfirmComponent(command, match));
+		const choice = await ctx.ui.custom(createBashGuardConfirmComponent(command, match), {
+			overlay: true,
+			overlayOptions: {
+				anchor: "center",
+				width: "70%",
+				maxHeight: "70%",
+				margin: 2,
+			},
+		});
 
 		if (choice !== "allow") {
 			return { block: true, reason: "Blocked by user" };
