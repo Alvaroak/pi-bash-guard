@@ -8,7 +8,7 @@ Subagents run headlessly with no UI to confirm against, so a dangerous command f
 
 State changes are published over `pi.events` (`bash-guard:changed`) so other extensions (e.g. a status footer) can render the shield flag.
 
-> Adapted from [mogassama/pi-agent-config](https://github.com/mogassama/pi-agent-config) (`extensions/bash-guard`).
+> Adapted from [amosblomqvist/pi-config](https://github.com/amosblomqvist/pi-config) (`extensions/bash-guard`).
 
 ## Install
 
