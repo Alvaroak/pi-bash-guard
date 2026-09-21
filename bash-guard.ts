@@ -131,15 +131,23 @@ export default function bashGuardExtension(pi: ExtensionAPI): void {
 			return { block: true, reason: `Bash guard: blocked "${match}" (no UI for confirmation)` };
 		}
 
-		const choice = await ctx.ui.custom(createBashGuardConfirmComponent(command, match), {
-			overlay: true,
-			overlayOptions: {
-				anchor: "center",
-				width: "70%",
-				maxHeight: "70%",
-				margin: 2,
-			},
-		});
+		// The Herdr state bridge turns this into a blocked/red agent state and
+		// raises Herdr's normal attention notification for a blocked pane.
+		pi.events.emit("herdr:blocked", { active: true, label: `Bash guard: ${match}` });
+		let choice: "allow" | "deny";
+		try {
+			choice = await ctx.ui.custom(createBashGuardConfirmComponent(command, match), {
+				overlay: true,
+				overlayOptions: {
+					anchor: "center",
+					width: "70%",
+					maxHeight: "70%",
+					margin: 2,
+				},
+			});
+		} finally {
+			pi.events.emit("herdr:blocked", { active: false });
+		}
 
 		if (choice !== "allow") {
 			return { block: true, reason: "Blocked by user" };
