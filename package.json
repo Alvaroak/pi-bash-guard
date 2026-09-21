@@ -1,0 +1,26 @@
+{
+  "name": "@alvaroak/pi-bash-guard",
+  "version": "0.1.0",
+  "description": "Confirmation gate for destructive bash commands in the Pi coding agent",
+  "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "security",
+    "bash"
+  ],
+  "files": [
+    "bash-guard.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./bash-guard.ts"
+    ]
+  }
+}
